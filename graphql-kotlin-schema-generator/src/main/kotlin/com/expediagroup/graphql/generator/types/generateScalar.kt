@@ -19,6 +19,7 @@ package com.expediagroup.graphql.generator.types
 import com.expediagroup.graphql.exceptions.InvalidIdTypeException
 import com.expediagroup.graphql.generator.SchemaGenerator
 import com.expediagroup.graphql.generator.extensions.getKClass
+import com.expediagroup.graphql.generator.extensions.isListType
 import com.expediagroup.graphql.generator.extensions.safeCast
 import graphql.Scalars
 import graphql.schema.GraphQLScalarType
@@ -30,6 +31,9 @@ import kotlin.reflect.full.isSubclassOf
 
 internal fun generateScalar(generator: SchemaGenerator, type: KType, annotatedAsID: Boolean): GraphQLScalarType? {
     val kClass = type.getKClass()
+    if (kClass.isListType()) {
+        return null
+    }
     val scalar = when {
         annotatedAsID -> getId(kClass)
         else -> defaultScalarsMap[kClass]

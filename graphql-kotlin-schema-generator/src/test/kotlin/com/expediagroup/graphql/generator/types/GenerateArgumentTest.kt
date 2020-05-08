@@ -20,6 +20,7 @@ import com.expediagroup.graphql.annotations.GraphQLDescription
 import com.expediagroup.graphql.annotations.GraphQLID
 import com.expediagroup.graphql.annotations.GraphQLName
 import com.expediagroup.graphql.exceptions.InvalidInputFieldTypeException
+import com.expediagroup.graphql.extensions.unwrapType
 import com.expediagroup.graphql.test.utils.SimpleDirective
 import graphql.Scalars
 import graphql.Scalars.GraphQLString
@@ -54,6 +55,8 @@ internal class GenerateArgumentTest : TypeTestHelper() {
         fun arrayListArg(input: ArrayList<String>) = input
 
         fun listArg(input: List<String>) = input
+
+        fun idList(@GraphQLID idsArg: List<String>) = "All IDs = $idsArg"
     }
 
     @Test
@@ -135,5 +138,16 @@ internal class GenerateArgumentTest : TypeTestHelper() {
 
         assertEquals(expected = "input", actual = result.name)
         assertNotNull(GraphQLTypeUtil.unwrapNonNull(result.type) as? GraphQLList)
+    }
+
+    @Test
+    fun `IDs List argument type is valid`() {
+        val kParameter = ArgumentTestClass::idList.findParameterByName("idsArg")
+        assertNotNull(kParameter)
+        val result = generateArgument(generator, kParameter)
+
+        assertEquals(expected = "idsArg", actual = result.name)
+        assertNotNull(GraphQLTypeUtil.unwrapNonNull(result.type) as? GraphQLList)
+        assertEquals(Scalars.GraphQLID, result.type.unwrapType())
     }
 }
